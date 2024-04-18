@@ -1,0 +1,11 @@
+Model Information:
+* title:	Chun-Li Tatsunoko vs Capcom Street Fighter
+* source:	https://sketchfab.com/3d-models/chun-li-tatsunoko-vs-capcom-street-fighter-4ff78ee885d44bd2a0e578317acc6ab4
+* author:	Romélus 3D (https://sketchfab.com/Romelus)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Chun-Li Tatsunoko vs Capcom Street Fighter" (https://sketchfab.com/3d-models/chun-li-tatsunoko-vs-capcom-street-fighter-4ff78ee885d44bd2a0e578317acc6ab4) by Romélus 3D (https://sketchfab.com/Romelus) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
