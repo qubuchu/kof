@@ -1,0 +1,11 @@
+Model Information:
+* title:	Ben 10 Wrath of Psychobos - Ben Tennyson
+* source:	https://sketchfab.com/3d-models/ben-10-wrath-of-psychobos-ben-tennyson-9bcc56c593ea4ecba37439463e7da839
+* author:	Kabiidev (https://sketchfab.com/Kabiidev)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Ben 10 Wrath of Psychobos - Ben Tennyson" (https://sketchfab.com/3d-models/ben-10-wrath-of-psychobos-ben-tennyson-9bcc56c593ea4ecba37439463e7da839) by Kabiidev (https://sketchfab.com/Kabiidev) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

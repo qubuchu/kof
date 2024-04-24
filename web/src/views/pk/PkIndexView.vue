@@ -1,22 +1,23 @@
 <template>
-    <MatchGround v-if="$store.state.pk.status === 'matching'">
+    <MatchGround v-if="$store.state.pk.status === 'matchings'">
     </MatchGround>
-    <ContentField v-if="$store.state.pk.status === 'playing'">
-        对战
+    <ContentField v-if="$store.state.pk.status === 'matching'">
+        <MyScene></MyScene>
     </ContentField>
 </template>
 
 <script>
 import ContentField from "@/components/ContentField.vue"
 import MatchGround from "@/components/MatchGround.vue"
-// import MyScene from "@/components/MyScene.vue"
+import MyScene from "@/components/MyScene.vue"
 import { onMounted, onUnmounted } from "vue";
 import { useStore } from "vuex";
 
 export default {
     components: {
         ContentField,
-        MatchGround
+        MatchGround,
+        MyScene
     },
     setup() {
         const store = useStore();
