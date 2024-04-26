@@ -10,12 +10,8 @@ import { KOF } from "@/assets/scripts/game/base.js"
 
 export default {
   setup() {
-
-    // // 设置相机位置
-  
     let kof = new KOF('kof');
     kof.start();
-
   }
 };
 </script>
@@ -25,3 +21,4 @@ export default {
   
 }
 </style>
+

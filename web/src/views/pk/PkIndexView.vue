@@ -1,7 +1,7 @@
 <template>
-    <MatchGround v-if="$store.state.pk.status === 'matchings'">
+    <MatchGround v-if="$store.state.pk.status === 'matching'">
     </MatchGround>
-    <ContentField v-if="$store.state.pk.status === 'matching'">
+    <ContentField v-if="$store.state.pk.status === 'playing'">
         <MyScene></MyScene>
     </ContentField>
 </template>

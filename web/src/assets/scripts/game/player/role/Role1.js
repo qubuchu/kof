@@ -25,6 +25,8 @@ export class Role1 extends Player {
         this.clips = [];
         this.collider = null;
         this.rigidBody = null;
+
+        this.mass = 1;
     }
 
     start() {
@@ -36,7 +38,6 @@ export class Role1 extends Player {
                 "/static/model/role1/scene.gltf",
                 function (gltf) {
                     gltf.scene.position.set(outer.x, outer.y, outer.z);
-                    // outer.root.scene.add(gltf.scene);
                     outer.role = gltf.scene;
 
                     //物理相关
@@ -56,7 +57,7 @@ export class Role1 extends Player {
     createPhysicsShape() {
         // 34min
         // 创建胶囊体碰撞体
-        this.collider = new this.root.ammo.btCapsuleShape(1, 2); // 参数为半径和高度
+        this.collider = new this.root.ammo.btCapsuleShape(0.6, 0.3); // 参数为半径和高度
         this.collider.setMargin(this.root.margin);
 
         this.createRigidBody(this.role, this.collider, 1);
@@ -64,30 +65,49 @@ export class Role1 extends Player {
 
     createRigidBody(threeObject, physicsShape, mass) {
         // 创建刚体并将碰撞体关联起来
+        var quat = new THREE.Quaternion();
+        if (this.id == 0)
+            quat.set(0, 1, 0, -Math.PI / 2);
+        else
+            quat.set(0, 1, 0, Math.PI / 2);
+        threeObject.quaternion.copy(quat);
+
         const startTransform = new this.root.ammo.btTransform();
         startTransform.setIdentity();
+
         startTransform.setOrigin(new this.root.ammo.btVector3(this.x, this.y, this.z));
+        startTransform.setRotation(new this.root.ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         const motionState = new this.root.ammo.btDefaultMotionState(startTransform);
+
+
+        // const quaternion = new this.root.ammo.btQuaternion();
+        // quaternion.setRotation(new this.root.ammo.btVector3(0, 0, 1), Math.PI / 2); // 在y轴上旋转90度
+        // startTransform.setRotation(quaternion);
 
         const localInertia = new this.root.ammo.btVector3(0, 0, 0);
         physicsShape.calculateLocalInertia(mass, localInertia); // 质量设为1，惯性设为localInertia
 
-        const rbInfo = new this.root.ammo.btRigidBodyConstructionInfo(1, motionState, physicsShape, localInertia);
+        const rbInfo = new this.root.ammo.btRigidBodyConstructionInfo(mass, motionState, physicsShape, localInertia);
         this.rigidBody = new this.root.ammo.btRigidBody(rbInfo);
 
-        this.rigidBody.setUserIndex2(1); // 设置为第一个碰撞组
+        // 创建刚体的角动量因子，限制只能绕 Y 轴旋转
+        const angularFactor = new this.root.ammo.btVector3(0, 0, 0); // X 轴和 Z 轴的角动量因子设置为 0，Y 轴的角动量因子设置为 1
+
+        // 设置刚体的角动量因子
+        this.rigidBody.setAngularFactor(angularFactor);
 
         threeObject.userData.physicsBody = this.rigidBody;
 
         this.root.scene.add(threeObject);
 
         if (mass > 0) {
-            this.root.rigidBodies.push(threeObject);
+            this.root.rigidBodies[this.id] = threeObject;
 
             this.rigidBody.setActivationState(4);
         }
 
-        this.root.world.addRigidBody(this.rigidBody);
+
+        this.root.physicsWorld.addRigidBody(this.rigidBody);
     }
 
 
