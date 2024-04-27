@@ -44,8 +44,18 @@ export default {
                     });
                     setTimeout(() => {
                         store.commit("updateStatus", "playing");
-                    }, 2000);
-                    store.commit("updateGamemap", data.gamemap);
+                    }, 200);
+                    store.commit("updateGame", data.game);
+                } else if(data.event === "operate") {
+                    console.log(data);
+                    const game = store.state.pk.gameObject;
+                    const playerA = game.players[0]; // players[0]必然为A玩家， 因为在构建Game时， 是从后端获取的game，               
+                    const playerB = game.players[1];
+                    const operateA = data.a_operate;// 玩家A的操作
+                    const operateB = data.b_operate;
+
+                    playerA.setOperate(operateA[0], operateA[1], operateA[2], operateA[3], operateA[4], operateA[5], operateA[6]); // A 玩家设置操作 
+                    playerB.setOperate(operateB[0], operateB[1], operateB[2], operateB[3], operateB[4], operateB[5], operateB[6]); // B 玩家设置操作
                 }
                 console.log(data);
             }

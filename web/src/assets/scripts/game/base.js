@@ -6,9 +6,9 @@ import { Role1 } from "./player/role/Role1";
 import * as Ammo from '@cocos/ammo'
 
 export class KOF {
-    constructor(id) {
-        console.log(id);
+    constructor(store) {
 
+        this.store = store;
         this.camera = null;
         this.scene = null;
         this.renderer = null;
@@ -16,6 +16,7 @@ export class KOF {
         this.clock = new THREE.Clock();
         this.cube1 = null;
         this.cube2 = null;
+        this.dirction = null;
 
         this.gravityConstant = -200;
         this.collisionConfiguration = null;
@@ -38,20 +39,33 @@ export class KOF {
             outer.init();
             this.controller = new Controller();
             this.game_map = new GameMap(this);
-            this.players = [
-                new Role1(this, {
-                    id: 0,
-                    x: 2,
-                    y: 3,
-                    z: 0,
-                }),
-                new Role1(this, {
-                    id: 1,
-                    x: -2,
-                    y: 3,
-                    z: 0,
-                })
-            ]
+            function updatePlayers(callback) {
+                // 假设这里进行了一些更新操作，然后调用回调函数
+                // 模拟更新完成后调用回调函数
+                callback();
+            }
+
+            // 定义一个回调函数，在更新完成后执行
+            function callbackFunction() {
+                // 在这里可以进行你想要的操作，比如访问和操作角色对象
+                outer.players = [
+                    new Role1(outer, {
+                        id: outer.store.state.pk.a_id,
+                        x: outer.store.state.pk.a_sx,
+                        y: outer.store.state.pk.a_sy,
+                        z: outer.store.state.pk.a_sz,
+                    }),
+                    new Role1(outer, {
+                        id: outer.store.state.pk.b_id,
+                        x: outer.store.state.pk.b_sx,
+                        y: outer.store.state.pk.b_sy,
+                        z: outer.store.state.pk.b_sz,
+                    })
+                ]
+            }
+
+            // 调用 updatePlayers，并传入回调函数作为参数
+            updatePlayers(callbackFunction);
             this.initCompleteCallback();// 回调函数
         })
     }
@@ -173,10 +187,6 @@ export class KOF {
         wall_down.castShadow = false;
     }
 
-    createRendomColorObjectMeatrial() {
-        var color = Math.floor(Math.random() * (1 << 24));
-        return new THREE.MeshPhongMaterial({ color: color });
-    }
 
     createParallellepiped(sx, sy, sz, mass, pos, quat, material) {
         var threeObject = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 1, 1, 1), material);
@@ -253,15 +263,17 @@ export class KOF {
 
         // 更新物体位置
         for (var i = 0, iL = this.rigidBodies.length; i < iL; i++) {
-            var objThree = this.rigidBodies[i];
-            var objPhys = objThree.userData.physicsBody;
-            var ms = objPhys.getMotionState();
-            if (ms) {
-                ms.getWorldTransform(this.transformAux1);
-                var p = this.transformAux1.getOrigin();
-                var q = this.transformAux1.getRotation();
-                objThree.position.set(p.x(), p.y(), p.z());
-                objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+            if (this.players[0] && this.players[1]) {
+                var objThree = this.rigidBodies[i];
+                var objPhys = objThree.userData.physicsBody;
+                var ms = objPhys.getMotionState();
+                if (ms) {
+                    ms.getWorldTransform(this.transformAux1);
+                    var p = this.transformAux1.getOrigin();
+                    var q = this.transformAux1.getRotation();
+                    objThree.position.set(p.x(), p.y(), p.z());
+                    objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+                }
             }
         }
     }

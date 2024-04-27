@@ -66,10 +66,17 @@ export class Role1 extends Player {
     createRigidBody(threeObject, physicsShape, mass) {
         // 创建刚体并将碰撞体关联起来
         var quat = new THREE.Quaternion();
-        if (this.id == 0)
-            quat.set(0, 1, 0, -Math.PI / 2);
-        else
+        let a_id = this.root.players[0].id; // 右边玩家id
+        let b_id = this.root.players[1].id; // 左边玩家id
+        if (this.id === b_id) {
+            console.log("create left");
             quat.set(0, 1, 0, Math.PI / 2);
+        }
+        if (this.id === a_id) {
+            console.log("create right");
+            quat.set(0, -1, 0, Math.PI / 2);
+        }
+
         threeObject.quaternion.copy(quat);
 
         const startTransform = new this.root.ammo.btTransform();
@@ -78,11 +85,6 @@ export class Role1 extends Player {
         startTransform.setOrigin(new this.root.ammo.btVector3(this.x, this.y, this.z));
         startTransform.setRotation(new this.root.ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         const motionState = new this.root.ammo.btDefaultMotionState(startTransform);
-
-
-        // const quaternion = new this.root.ammo.btQuaternion();
-        // quaternion.setRotation(new this.root.ammo.btVector3(0, 0, 1), Math.PI / 2); // 在y轴上旋转90度
-        // startTransform.setRotation(quaternion);
 
         const localInertia = new this.root.ammo.btVector3(0, 0, 0);
         physicsShape.calculateLocalInertia(mass, localInertia); // 质量设为1，惯性设为localInertia
@@ -100,8 +102,13 @@ export class Role1 extends Player {
 
         this.root.scene.add(threeObject);
 
-        if (mass > 0) {
-            this.root.rigidBodies[this.id] = threeObject;
+        if (mass > 0) { // A玩家的刚体存放在rigidBodyies[0]中
+            let id = 0;
+            if (this.id == this.root.players[0].id)// 当前角色为A
+                id = 0;
+            else
+                id = 1;
+            this.root.rigidBodies[id] = threeObject;
 
             this.rigidBody.setActivationState(4);
         }

@@ -1,4 +1,4 @@
-export class Controller {
+export class Controller { // 当set里的值， 发生改变， 说明有按键操作
     constructor() {
         this.pressed_keys = new Set();//存放不重复的值
         this.start();
@@ -13,19 +13,4 @@ export class Controller {
             outer.pressed_keys.delete(event.key)
         })
     }
-
-    // update(object) {
-    //     if (this.pressed_keys.has('ArrowLeft')) {
-    //         object.position.x -= 0.1;
-    //     }
-    //     if (this.pressed_keys.has('ArrowRight')) {
-    //         object.position.x += 0.1;
-    //     }
-    //     if (this.pressed_keys.has('ArrowUp')) {
-    //         object.position.z -= 0.1;
-    //     }
-    //     if (this.pressed_keys.has('ArrowDown')) {
-    //         object.position.z += 0.1;
-    //     }
-    // }
 }

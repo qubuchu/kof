@@ -1,6 +1,7 @@
 package com.dyy.backend.consumer;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dyy.backend.consumer.utils.Game;
 import com.dyy.backend.consumer.utils.JwtAuthentication;
 import com.dyy.backend.mapper.UserMapper;
 import com.dyy.backend.pojo.User;
@@ -11,6 +12,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -20,12 +22,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @ServerEndpoint("/websocket/{token}")  // 注意不要以'/'结尾
 public class WebSocketServer {
 
-    final private static ConcurrentHashMap<Integer, WebSocketServer> users = new ConcurrentHashMap<>();
+    final public static ConcurrentHashMap<Integer, WebSocketServer> users = new ConcurrentHashMap<>();
     final private static CopyOnWriteArraySet<User> matchpool = new CopyOnWriteArraySet<>();
     private User user;
     private Session session = null;
 
     private static UserMapper userMapper;
+    private Game game = null;
 
     @Autowired
     public void setUserMapper(UserMapper userMapper) {
@@ -48,7 +51,6 @@ public class WebSocketServer {
         else {
             this.session.close();
         }
-        System.out.println(user);
     }
 
     @OnClose
@@ -70,17 +72,34 @@ public class WebSocketServer {
             matchpool.remove(a);
             matchpool.remove(b);
 
+            Game game = new Game(a.getId(), b.getId());
+            users.get(a.getId()).game = game;
+            users.get(b.getId()).game = game;
+
+            game.start();
+
+            JSONObject respGame = new JSONObject();
+            respGame.put("a_id", game.getPlayerA().getId());
+            respGame.put("a_sx", game.getPlayerA().getSx());
+            respGame.put("a_sy", game.getPlayerA().getSy());
+            respGame.put("a_sz", game.getPlayerA().getSz());
+            respGame.put("b_id", game.getPlayerB().getId());
+            respGame.put("b_sx", game.getPlayerB().getSx());
+            respGame.put("b_sy", game.getPlayerB().getSy());
+            respGame.put("b_sz", game.getPlayerB().getSz());
 
             JSONObject respA = new JSONObject();
             respA.put("event", "start-matching");
             respA.put("opponent_username", b.getUsername());
             respA.put("opponent_photo", b.getPhoto());
+            respA.put("game", respGame);
             users.get(a.getId()).sendMessage(respA.toJSONString());
 
             JSONObject respB = new JSONObject();
             respB.put("event", "start-matching");
             respB.put("opponent_username", a.getUsername());
             respB.put("opponent_photo", a.getPhoto());
+            respB.put("game", respGame);
             users.get(b.getId()).sendMessage(respB.toJSONString());
         }
     }
@@ -88,6 +107,22 @@ public class WebSocketServer {
     private void stopMatching() {
         System.out.println("stop matching");
         matchpool.remove(this.user);
+    }
+
+    private void operate(int[] keyin) {
+        if(game.getPlayerA().getId().equals(user.getId())) {
+            game.setNextStepA(keyin);
+        } else if (game.getPlayerB().getId().equals(user.getId())) {
+            game.setNextStepB(keyin);
+        }
+    }
+
+    private void decrease(int hp, int id) {
+        if(game.getPlayerA().getId().equals(user.getId())) {
+            game.setHpB(hp);
+        } else if (game.getPlayerB().getId().equals(user.getId())) {
+            game.setHpA(hp);
+        }
     }
 
     @OnMessage
@@ -98,8 +133,23 @@ public class WebSocketServer {
         String event = data.getString("event");
         if("start-matching".equals(event)) {
             startMatching();
-        } else {
+        } else if("stop-matching".equals(event)) {
             stopMatching();
+        } else if("operate".equals(event)) { // 传入操作
+            int ow = data.getInteger("ow");
+            int os = data.getInteger("os");
+            int oa = data.getInteger("oa");
+            int od = data.getInteger("od");
+            int ospace = data.getInteger("ospace");
+            int oj = data.getInteger("oj");
+            int ok = data.getInteger("ok");
+            int[] op = {ow, os, oa, od, ospace, oj, ok};
+            System.out.println(Arrays.toString(op));
+            operate(op);
+        } else if("fight".equals(event)) {
+            int hp = data.getInteger("hp");
+            int id = data.getInteger("id");
+            decrease(hp, id);
         }
     }
 
