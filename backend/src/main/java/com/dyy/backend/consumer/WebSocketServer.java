@@ -58,6 +58,13 @@ public class WebSocketServer {
         // 关闭链接
         System.out.println("disconnected");
         if(this.user != null) {
+            if(game.getPlayerA().getId().equals(user.getId())) { // 如果请求为A玩家发出，则B掉血
+                game.setHpA(100);
+            } else if (game.getPlayerB().getId().equals(user.getId())) {
+                game.setHpB(100);
+            }
+            game.judge();
+            game.sendResult();
             users.remove(this.user.getId());
         }
     }
@@ -110,15 +117,15 @@ public class WebSocketServer {
     }
 
     private void operate(int[] keyin) {
-        if(game.getPlayerA().getId().equals(user.getId())) {
+        if(game.getPlayerA().getId().equals(user.getId())) { // 判断请求为哪位玩家发出
             game.setNextStepA(keyin);
         } else if (game.getPlayerB().getId().equals(user.getId())) {
             game.setNextStepB(keyin);
         }
     }
 
-    private void decrease(int hp, int id) {
-        if(game.getPlayerA().getId().equals(user.getId())) {
+    private void decrease(int hp) { // 同时减少是因为同步问题， 客户端的玩家A和玩家B都向服务器发送了请求
+        if(game.getPlayerA().getId().equals(user.getId())) { // 如果请求为A玩家发出，则B掉血
             game.setHpB(hp);
         } else if (game.getPlayerB().getId().equals(user.getId())) {
             game.setHpA(hp);
@@ -128,7 +135,7 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, Session session) {
         // 从Client接收消息
-        System.out.println("receive message");
+//        System.out.println("receive message");
         JSONObject data = JSONObject.parseObject(message);
         String event = data.getString("event");
         if("start-matching".equals(event)) {
@@ -144,12 +151,10 @@ public class WebSocketServer {
             int oj = data.getInteger("oj");
             int ok = data.getInteger("ok");
             int[] op = {ow, os, oa, od, ospace, oj, ok};
-            System.out.println(Arrays.toString(op));
             operate(op);
-        } else if("fight".equals(event)) {
+        } else if("attack".equals(event)) {
             int hp = data.getInteger("hp");
-            int id = data.getInteger("id");
-            decrease(hp, id);
+            decrease(hp);
         }
     }
 

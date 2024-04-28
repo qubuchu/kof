@@ -32,22 +32,13 @@ export class Player extends GameObject {
         this.collider = null;//碰撞体对象
         this.rigidBody = null;//刚体对象
         this.body = null;
-        this.is_me = false;
-        this.is_0 = false;
     }
 
-    start() {
-        if (this.id === this.root.store.state.user.id)
-            this.is_me = true;
-        else
-            this.is_me = false;
-        if (this.root.store.state.user.id === this.root.players[0].id) // 自己是0号玩家
-            this.is_0 = true;
-        else // 自己是1号玩家
-            this.is_0 = false;
+    on_destroy() {
+
     }
 
-    //角色移动
+    //在检测到输入后，向后端发送信息，调用该函数更改自己角色状态
     setOperate(ow, os, oa, od, ospace, oj, ok) {
         let w, a, s, d, space, j, k;
         if (ow > 0)
@@ -267,29 +258,13 @@ export class Player extends GameObject {
             this.root.cube1.position.set(this.x + 0.1, this.y + 1.4, this.z);
     }
 
-    is_attack() { // 受到攻击
+    is_attack(down) { // 收到攻击，只能由后端收到消息后调用
         if (this.status === 7) return;
 
         this.status = 6;
         this.frame_current_cnt = 0;
 
-        this.hp = Math.max(this.hp - 20, 0);
-        let id = 0;
-        if (this.id == this.root.store.state.user.id)
-            id = 0;
-        else
-            id = 1;
-        if (id === 0) {
-            this.root.cube0.scale.set(1, 1, this.hp / 100);
-            if (this.hp <= 0) {
-                this.root.cube0.scale.set(0, 0, 0);
-            }
-        } else {
-            this.root.cube1.scale.set(1, 1, this.hp / 100);
-            if (this.hp <= 0) {
-                this.root.cube1.scale.set(0, 0, 0);
-            }
-        }
+        this.hp = Math.max(this.hp - down, 0);
 
         if (this.hp <= 0) {
             this.status = 7;
@@ -319,42 +294,38 @@ export class Player extends GameObject {
         return false;
     }
 
-    update_attack() { // 攻击
-        let you = null;
-        if (this.is_0) // 如果自己是A玩家
-            you = this.root.players[1];
-        else
-            you = this.root.players[0];
+    update_attack() { // 攻击，在前端实现碰撞检测，在检测到自己状态为攻击，且攻击到对方角色时，向后端发生请求（该请求由自己玩家发出，更改对方玩家血量）
+        if (this.id != this.root.store.state.user.id)
+            return;
         let outer = this;
 
         if (this.status === 4 && this.frame_current_cnt === 40) {
-            if (this.is_collision(this.rigidBody, you.rigidBody)) {
+            if (this.is_collision(this.root.players[0].rigidBody, this.root.players[1].rigidBody)) {
                 console.log("打中了！");
                 outer.root.store.state.pk.socket.send(JSON.stringify({
-                    event: "fight",
+                    event: "attack",
                     hp: "20",
-                    id: you.id,
                 }));
-                you.is_attack();
             }
-            // this.root.destory(leg);
             this.frame_current_cnt = 0;
         }
         if (this.status === 3 && this.frame_current_cnt === 30) {
-            if (this.is_collision(this.rigidBody, you.rigidBody)) {
+            if (this.is_collision(this.root.players[0].rigidBody, this.root.players[1].rigidBody)) {
                 console.log("打中了！");
                 outer.root.store.state.pk.socket.send(JSON.stringify({
-                    event: "fight",
+                    event: "attack",
                     hp: "20",
-                    id: you.id,
                 }));
-                you.is_attack();
             }
             this.frame_current_cnt = 0;
         }
     }
 
     update() {
+        if (this.root.store.state.pk.loser != "none")
+        {
+            console.log("over")
+        }
         if (this.role && this.role.userData && this.role.userData.physicsBody) {
             // 安全地访问 objThree.userData.physicsBody
             this.frame_current_cnt++;
@@ -362,6 +333,7 @@ export class Player extends GameObject {
             this.update_control();
             this.update_attack();
             this.render();
+            this.render_hp();
         } else {
             console.error("对象或属性未定义。");
         }
@@ -393,5 +365,24 @@ export class Player extends GameObject {
         }
         if (role.mixer)
             role.mixer.update(0.02);
+    }
+
+    render_hp() { // 渲染血条
+        let id = 0;
+        if (this.id == this.root.players[0].id) // 当前渲染角色为右边玩家
+            id = 0;
+        else
+            id = 1;
+        if (id === 0) {
+            this.root.cube0.scale.set(1, 1, this.hp / 100);
+            if (this.hp <= 0) {
+                this.root.cube0.scale.set(0, 0, 0);
+            }
+        } else {
+            this.root.cube1.scale.set(1, 1, this.hp / 100);
+            if (this.hp <= 0) {
+                this.root.cube1.scale.set(0, 0, 0);
+            }
+        }
     }
 }

@@ -69,11 +69,9 @@ export class Role1 extends Player {
         let a_id = this.root.players[0].id; // 右边玩家id
         let b_id = this.root.players[1].id; // 左边玩家id
         if (this.id === b_id) {
-            console.log("create left");
             quat.set(0, 1, 0, Math.PI / 2);
         }
         if (this.id === a_id) {
-            console.log("create right");
             quat.set(0, -1, 0, Math.PI / 2);
         }
 

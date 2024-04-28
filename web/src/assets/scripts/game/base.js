@@ -30,6 +30,8 @@ export class KOF {
 
         this.time = 0;
 
+        this.loser = null;
+
         this.ammo = null;
         let outer = this;
         this.transformAux1 = null;
@@ -70,7 +72,47 @@ export class KOF {
         })
     }
 
+    destroy() {
+        // 移除场景中的所有对象
+        console.log("destroy begin");
+
+        let outer = this;
+        this.scene.children.forEach(obj => {
+            if (obj.userData && obj.userData.physicsBody) {
+                // 如果对象有物理属性，先从物理引擎中移除
+                this.physicsWorld.removeRigidBody(obj.userData.physicsBody);
+            }
+            outer.scene.remove(obj);
+        });
+
+
+
+        // 释放渲染器相关资源
+        this.renderer.dispose();
+
+        // 释放其他资源
+        this.physicsWorld = null;
+        this.collisionConfiguration = null;
+        this.dispatcher = null;
+        this.broadphase = null;
+        this.solver = null;
+
+        // 清空场景中的对象数组
+        this.rigidBodies = [];
+
+        // 清空其他变量和引用
+        this.camera = null;
+        this.textureLoader = null;
+        this.cube1 = null;
+        this.cube2 = null;
+        this.dirction = null;
+        this.transformAux1 = null;
+        console.log("destroy over");
+    }
+
     initCompleteCallback() {
+        if (this.store.state.pk.loser != "none")
+            return;
         this.animate(); // 在回调函数中执行
     }
 
@@ -234,12 +276,6 @@ export class KOF {
         this.physicsWorld.addRigidBody(body);
 
         return body;
-    }
-
-    destory(threeObject) {
-        this.physicsWorld.removeRigidBody(threeObject.userData.physicsBody);
-        // threeObject.userData.physicsBody.dispose();
-        this.scene.remove(threeObject);
     }
 
     animate() {

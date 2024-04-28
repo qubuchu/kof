@@ -19,7 +19,9 @@ public class Game extends Thread{
     private String status = "playing"; // playing finished
     private String loser = ""; // all: 平局 A: A输 B: B输
     private int hpA = 100;
+    private int downA = 0; // 玩家A减少生命，用于判断是否需要发送信息给前端
     private int hpB = 100;
+    private int downB = 0;
 
     public Game(Integer idA, Integer idB) {
         playerA = new Player(idA, 2, 3, 0, hpA, new ArrayList<>());
@@ -55,6 +57,7 @@ public class Game extends Thread{
     public void setHpA(int down) {
         lock.lock();
         try {
+            this.downA = down;
             this.hpA = this.hpA - down;
         } finally {
             lock.unlock();
@@ -64,6 +67,7 @@ public class Game extends Thread{
     public void setHpB(int down) {
         lock.lock();
         try {
+            this.downB = down;
             this.hpB = this.hpB - down;
         } finally {
             lock.unlock();
@@ -103,6 +107,10 @@ public class Game extends Thread{
                     lock.unlock();
                 }
             }
+            if (this.downA != 0)
+                flagA = true;
+            if (this.downB != 0)
+                flagB = true;
             if (flagA || flagB)
                 return true;
         } catch (InterruptedException e) {
@@ -112,7 +120,7 @@ public class Game extends Thread{
         return false;
     }
 
-    private void judge() {
+    public void judge() {
         lock.lock();
         try {
             if(this.hpA == 0)
@@ -143,14 +151,14 @@ public class Game extends Thread{
             resp.put("event", "operate");
             resp.put("a_operate", nextStepA);
             resp.put("b_operate", nextStepB);
-            System.out.println("?");
-            for(int i = 0; i < 7; i ++ )
-                System.out.print(nextStepA[i] + " ");
+            resp.put("a_down", downA);
+            resp.put("b_down", downB);
             sendAllMessage(resp.toJSONString());
             for(int i = 0; i < 7; i ++ ){
                 nextStepA[i] = 0;
                 nextStepB[i] = 0;
             }
+            downA = downB = 0;
         } finally {
             lock.unlock();
         }
@@ -165,7 +173,6 @@ public class Game extends Thread{
 
     @Override
     public void run() {
-//        for(int i = 0; i < 1000; i ++) {
         while(true) {
             if (nextStep()) // 存在操作
             {
@@ -173,12 +180,11 @@ public class Game extends Thread{
                 if (status.equals("playing")) {
                     sendOperate();
                 } else {
+                    sendOperate();
                     sendResult();
                     break;
                 }
             }
         }
-//        }
-//        System.out.println(1000);
     }
 }

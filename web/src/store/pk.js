@@ -13,7 +13,7 @@ export default {
         b_sy: 0,
         b_sz: 0,
         gameObject: null,
-        loser: "none",  // none、all、A、B
+        loser: "none",  // none、A、B
     },
     getters: {
     },

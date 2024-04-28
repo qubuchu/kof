@@ -1,23 +1,23 @@
 <template>
-    <MatchGround v-if="$store.state.pk.status === 'matching'">
-    </MatchGround>
-    <ContentField v-if="$store.state.pk.status === 'playing'">
-        <MyScene></MyScene>
-    </ContentField>
+    <MatchGround v-if="$store.state.pk.status === 'matching'"></MatchGround>
+    <PlayGround v-if="$store.state.pk.status === 'playing'"></PlayGround>
+    <ResultBoard v-if="$store.state.pk.loser != 'none'"></ResultBoard>
 </template>
 
 <script>
-import ContentField from "@/components/ContentField.vue"
+// import ContentField from "@/components/ContentField.vue"
 import MatchGround from "@/components/MatchGround.vue"
-import MyScene from "@/components/MyScene.vue"
+import PlayGround from "@/components/PlayGround.vue"
+import ResultBoard from "@/components/ResultBoard.vue";
 import { onMounted, onUnmounted } from "vue";
 import { useStore } from "vuex";
 
 export default {
     components: {
-        ContentField,
+        // ContentField,
         MatchGround,
-        MyScene
+        PlayGround,
+        ResultBoard,
     },
     setup() {
         const store = useStore();
@@ -46,18 +46,38 @@ export default {
                         store.commit("updateStatus", "playing");
                     }, 200);
                     store.commit("updateGame", data.game);
-                } else if(data.event === "operate") {
-                    console.log(data);
+                } else if(data.event === "operate") { // 更改人物状态，只能从后端进行
                     const game = store.state.pk.gameObject;
                     const playerA = game.players[0]; // players[0]必然为A玩家， 因为在构建Game时， 是从后端获取的game，               
                     const playerB = game.players[1];
                     const operateA = data.a_operate;// 玩家A的操作
                     const operateB = data.b_operate;
+                    const downA = data.a_down;
+                    const downB = data.b_down;
 
                     playerA.setOperate(operateA[0], operateA[1], operateA[2], operateA[3], operateA[4], operateA[5], operateA[6]); // A 玩家设置操作 
                     playerB.setOperate(operateB[0], operateB[1], operateB[2], operateB[3], operateB[4], operateB[5], operateB[6]); // B 玩家设置操作
+                    if(downA != 0)
+                        playerA.is_attack(downA);
+                    if(downB != 0)
+                        playerB.is_attack(downB);
+                } else if(data.event === "result") {
+                    const game = store.state.pk.gameObject;
+                    game.loser = data.loser;
+                    console.log(game.loser);
+
+                    if (game.loser === "A") {
+                        game.players[0].status = 7;
+                        game.players[1].status = 0;
+                    }
+                    if (game.loser === "B") {
+                        game.players[0].status = 0;
+                        game.players[1].status = 7;
+                    }
+                    store.commit("updateLoser", data.loser);
+                    console.log("over game");
+                    // game.destroy();
                 }
-                console.log(data);
             }
 
             socket.onclose = () => {
