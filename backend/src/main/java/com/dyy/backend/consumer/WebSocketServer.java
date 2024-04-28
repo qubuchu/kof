@@ -1,8 +1,9 @@
 package com.dyy.backend.consumer;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dyy.backend.consumer.utils.Game;
+import com.dyy.backend.consumer.utils.Gameback;
 import com.dyy.backend.consumer.utils.JwtAuthentication;
+import com.dyy.backend.mapper.GameMapper;
 import com.dyy.backend.mapper.UserMapper;
 import com.dyy.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,8 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
@@ -27,12 +26,18 @@ public class WebSocketServer {
     private User user;
     private Session session = null;
 
-    private static UserMapper userMapper;
-    private Game game = null;
+    public static UserMapper userMapper;
+    public static GameMapper gameMapper;
+    private Gameback gameback = null;
 
     @Autowired
     public void setUserMapper(UserMapper userMapper) {
         WebSocketServer.userMapper = userMapper;
+    }
+
+    @Autowired
+    public void setGameMapper(GameMapper gameMapper) {
+        WebSocketServer.gameMapper = gameMapper;
     }
 
     @OnOpen
@@ -58,13 +63,6 @@ public class WebSocketServer {
         // 关闭链接
         System.out.println("disconnected");
         if(this.user != null) {
-            if(game.getPlayerA().getId().equals(user.getId())) { // 如果请求为A玩家发出，则B掉血
-                game.setHpA(100);
-            } else if (game.getPlayerB().getId().equals(user.getId())) {
-                game.setHpB(100);
-            }
-            game.judge();
-            game.sendResult();
             users.remove(this.user.getId());
         }
     }
@@ -79,21 +77,21 @@ public class WebSocketServer {
             matchpool.remove(a);
             matchpool.remove(b);
 
-            Game game = new Game(a.getId(), b.getId());
-            users.get(a.getId()).game = game;
-            users.get(b.getId()).game = game;
+            Gameback gameback = new Gameback(a.getId(), b.getId());
+            users.get(a.getId()).gameback = gameback;
+            users.get(b.getId()).gameback = gameback;
 
-            game.start();
+            gameback.start();
 
             JSONObject respGame = new JSONObject();
-            respGame.put("a_id", game.getPlayerA().getId());
-            respGame.put("a_sx", game.getPlayerA().getSx());
-            respGame.put("a_sy", game.getPlayerA().getSy());
-            respGame.put("a_sz", game.getPlayerA().getSz());
-            respGame.put("b_id", game.getPlayerB().getId());
-            respGame.put("b_sx", game.getPlayerB().getSx());
-            respGame.put("b_sy", game.getPlayerB().getSy());
-            respGame.put("b_sz", game.getPlayerB().getSz());
+            respGame.put("a_id", gameback.getPlayerA().getId());
+            respGame.put("a_sx", gameback.getPlayerA().getSx());
+            respGame.put("a_sy", gameback.getPlayerA().getSy());
+            respGame.put("a_sz", gameback.getPlayerA().getSz());
+            respGame.put("b_id", gameback.getPlayerB().getId());
+            respGame.put("b_sx", gameback.getPlayerB().getSx());
+            respGame.put("b_sy", gameback.getPlayerB().getSy());
+            respGame.put("b_sz", gameback.getPlayerB().getSz());
 
             JSONObject respA = new JSONObject();
             respA.put("event", "start-matching");
@@ -117,18 +115,18 @@ public class WebSocketServer {
     }
 
     private void operate(int[] keyin) {
-        if(game.getPlayerA().getId().equals(user.getId())) { // 判断请求为哪位玩家发出
-            game.setNextStepA(keyin);
-        } else if (game.getPlayerB().getId().equals(user.getId())) {
-            game.setNextStepB(keyin);
+        if(gameback.getPlayerA().getId().equals(user.getId())) { // 判断请求为哪位玩家发出
+            gameback.setNextStepA(keyin);
+        } else if (gameback.getPlayerB().getId().equals(user.getId())) {
+            gameback.setNextStepB(keyin);
         }
     }
 
     private void decrease(int hp) { // 同时减少是因为同步问题， 客户端的玩家A和玩家B都向服务器发送了请求
-        if(game.getPlayerA().getId().equals(user.getId())) { // 如果请求为A玩家发出，则B掉血
-            game.setHpB(hp);
-        } else if (game.getPlayerB().getId().equals(user.getId())) {
-            game.setHpA(hp);
+        if(gameback.getPlayerA().getId().equals(user.getId())) { // 如果请求为A玩家发出，则B掉血
+            gameback.setHpB(hp);
+        } else if (gameback.getPlayerB().getId().equals(user.getId())) {
+            gameback.setHpA(hp);
         }
     }
 

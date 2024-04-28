@@ -2,13 +2,14 @@ package com.dyy.backend.consumer.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dyy.backend.consumer.WebSocketServer;
-import org.springframework.aop.scope.ScopedProxyUtils;
+import com.dyy.backend.pojo.Game;
+import com.dyy.backend.pojo.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Game extends Thread{
+public class Gameback extends Thread{
     private final static int[] operate = {0, 0, 0, 0, 0, 0, 0};
     private final Player playerA, playerB;
 
@@ -23,9 +24,42 @@ public class Game extends Thread{
     private int hpB = 100;
     private int downB = 0;
 
-    public Game(Integer idA, Integer idB) {
+    public Gameback(Integer idA, Integer idB) {
         playerA = new Player(idA, 2, 3, 0, hpA, new ArrayList<>());
         playerB = new Player(idB, -2, 3, 0, hpB, new ArrayList<>());
+    }
+
+    private void updateUserRating(Player player, Integer rating) {
+        User user = WebSocketServer.userMapper.selectById(player.getId());
+        user.setRating(rating);
+        WebSocketServer.userMapper.updateById(user);
+    }
+
+    private void saveToDatabase() {
+        Date now = new Date();
+        Integer ratingA = WebSocketServer.userMapper.selectById(playerA.getId()).getRating();
+        Integer ratingB = WebSocketServer.userMapper.selectById(playerB.getId()).getRating();
+
+
+        int winid = 0;
+        if("A".equals(loser))
+        {
+            winid = playerB.getId();
+            ratingB += 10;
+            ratingA -= 10;
+        }
+        if("B".equals(loser))
+        {
+            winid = playerA.getId();
+            ratingB -= 10;
+            ratingA += 10;
+        }
+        Game game = new Game(null, playerA.getId(), playerB.getId(), 1, 1, now, now, winid);
+
+        updateUserRating(playerA, ratingA);
+        updateUserRating(playerB, ratingB);
+
+        WebSocketServer.gameMapper.insert(game);
     }
 
     public Player getPlayerA() {
@@ -168,6 +202,8 @@ public class Game extends Thread{
         JSONObject resp = new JSONObject();
         resp.put("event", "result");
         resp.put("loser", loser);
+        System.out.println("save");
+        saveToDatabase();
         sendAllMessage(resp.toJSONString());
     }
 

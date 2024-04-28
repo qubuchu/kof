@@ -1,12 +1,16 @@
 package com.dyy.backend.service.impl.game;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dyy.backend.mapper.GameMapper;
 import com.dyy.backend.pojo.Game;
 import com.dyy.backend.pojo.User;
 import com.dyy.backend.service.game.GetListService;
 import com.dyy.backend.service.impl.utils.GetUserImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,24 +23,26 @@ public class GetListServiceImpl implements GetListService{
     private GameMapper gameMapper;
 
     @Override
-    public List<Game> getList() {
-        List<Game> re = new ArrayList<>();
+    public JSONObject getList(Integer page) {
+        IPage<Game> gameIPage = new Page<>(page, 10);
 
         GetUserImpl getUser = new GetUserImpl();
         User user = getUser.getuser();
 
-        QueryWrapper<Game> queryWrapper1 = new QueryWrapper<>();
-        queryWrapper1.eq("player1", user.getId());
+        QueryWrapper<Game> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByDesc("play_begin_time");
+        queryWrapper.or(wrapper -> wrapper.eq("player1", user.getId()))
+                .or(wrapper -> wrapper.eq("player2", user.getId()));
 
-        re.addAll(gameMapper.selectList(queryWrapper1));
+        long res_count = gameMapper.selectCount(queryWrapper);
+        int lists_count = (int) res_count;
 
-        QueryWrapper<Game> queryWrapper2 = new QueryWrapper<>();
-        queryWrapper2.eq("player2", user.getId());
+        IPage<Game> resultPage = gameMapper.selectPage(gameIPage, queryWrapper);
+        List<Game> resultList = resultPage.getRecords();
 
-        re.addAll(gameMapper.selectList(queryWrapper2));
-
-        System.out.println(re.get(1));
-
-        return re;
+        JSONObject resp = new JSONObject();
+        resp.put("lists", resultList);
+        resp.put("lists_count", lists_count);
+        return resp;
     }
 }
