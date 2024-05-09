@@ -1,14 +1,17 @@
 <template>
     <div class="container">
-        <div class = "row" >
-            <div class = "col-3">
+        <div class="row">
+            <div class="col-3">
                 <div class="card" style="margin-top: 20px;">
                     <div class="card-body">
                         <img :src="$store.state.user.photo" alt="" style="width: 100%;">
                     </div>
+                    <div class="rating-score" style="margin-left: 20px;">
+                        <a>天梯分： {{ rating_score }}</a>
+                    </div>
                 </div>
             </div>
-            <div class = "col-9">
+            <div class="col-9">
                 <div class="card" style="margin-top: 20px;">
                     <div class="card-header">
                         <span style="font-size: 130%">对局记录</span>
@@ -25,7 +28,7 @@
                             <tbody>
                                 <tr v-for="list in lists" :key="list.id">
                                     <td>{{ list.role1 }}</td>
-                                    <td>{{ list.playBeginTime }}</td>
+                                    <td>{{ list.playTime }}</td>
 
                                     <td v-if="$store.state.user.id == list.winId" style="color: green;">win</td>
                                     <td v-else style="color: red">lose</td>
@@ -37,7 +40,8 @@
                                 <li class="page-item" @click="click_page(-2)">
                                     <a class="page-link" href="#">前一页</a>
                                 </li>
-                                <li :class="'page-item ' + page.is_active" v-for="page in pages" :key="page.number" @click="click_page(page.number)">
+                                <li :class="'page-item ' + page.is_active" v-for="page in pages" :key="page.number"
+                                    @click="click_page(page.number)">
                                     <a class="page-link" href="#">{{ page.number }}</a>
                                 </li>
                                 <li class="page-item" @click="click_page(-1)">
@@ -65,6 +69,9 @@ export default {
         let current_page = 1;
         let total_lists = 0;
         let pages = ref([]);
+        let rating_score = ref();
+        rating_score = store.state.user.rating;
+
 
         const click_page = page => {
             if (page === -2) page = current_page - 1;
@@ -79,7 +86,7 @@ export default {
         const udpate_pages = () => {
             let max_pages = parseInt(Math.ceil(total_lists / 10));
             let new_pages = [];
-            for (let i = current_page - 2; i <= current_page + 2; i ++ ) {
+            for (let i = current_page - 2; i <= current_page + 2; i++) {
                 if (i >= 1 && i <= max_pages) {
                     new_pages.push({
                         number: i,
@@ -115,7 +122,8 @@ export default {
         return {
             lists,
             pages,
-            click_page
+            click_page,
+            rating_score
         }
     }
 
@@ -123,5 +131,4 @@ export default {
 
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

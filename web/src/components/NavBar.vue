@@ -18,8 +18,7 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
-
-                <router-link class="dropdown-item" :to="{name: 'user_bot_index'}">我的Bot</router-link>
+                <router-link class="dropdown-item" :to="{name: 'user_game_record'}">对局记录</router-link>
             </li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="#" @click="logout">退出</a></li>
@@ -54,7 +53,6 @@ export default {
       const route = useRoute();
       let route_name = computed(() => route.name)
       store.commit("updatePullingInfo", false);
-      
       const logout = () => {
         store.dispatch("logout");
       }

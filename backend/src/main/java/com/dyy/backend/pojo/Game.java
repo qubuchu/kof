@@ -21,8 +21,6 @@ public class Game {
     private Integer role1;
     private Integer role2;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
-    private Date playBeginTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
-    private Date playEndTime;
+    private Date playTime;
     private Integer winId;
 }

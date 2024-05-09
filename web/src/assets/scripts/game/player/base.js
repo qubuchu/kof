@@ -203,7 +203,7 @@ export class Player extends GameObject {
             os: os,
             oa: oa,
             od: od,
-            ospace: ospace,
+            ospace: 0,
             oj: oj,
             ok: ok,
         }));
@@ -228,7 +228,8 @@ export class Player extends GameObject {
             this.x = p.x();
             this.y = p.y();
             this.z = p.z();
-            if (p.y() < 0.3 && p.y() > 0) {
+            console.log(p.y());
+            if (p.y() < 0.25 && p.y() > 0) {
                 this.vy = 0;
 
                 if (this.status === 2) {
@@ -241,9 +242,9 @@ export class Player extends GameObject {
             }
 
             if (p.x() > 5) {
-                this.vx = 0;
+                objThree.position.set(5, p.y(), p.z());
             } else if (p.x() < -5) {
-                this.vx = 0;
+                objThree.position.set(-5, p.y(), p.z());
             }
 
             if (p.z() > 5) {
@@ -322,8 +323,7 @@ export class Player extends GameObject {
     }
 
     update() {
-        if (this.root.store.state.pk.loser != "none")
-        {
+        if (this.root.store.state.pk.loser != "none") {
             console.log("over")
         }
         if (this.role && this.role.userData && this.role.userData.physicsBody) {

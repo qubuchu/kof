@@ -44,7 +44,7 @@ export default {
                     });
                     setTimeout(() => {
                         store.commit("updateStatus", "playing");
-                    }, 200);
+                    }, 2000);
                     store.commit("updateGame", data.game);
                 } else if(data.event === "operate") { // 更改人物状态，只能从后端进行
                     const game = store.state.pk.gameObject;

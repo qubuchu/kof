@@ -22,6 +22,8 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public Map<String, String> register(String username, String password, String confirmedPassword) {
+        System.out.println(username);
+
         Map<String, String> map = new HashMap<>();
         if (username == null) {
 
@@ -60,7 +62,13 @@ public class RegisterServiceImpl implements RegisterService {
             return map;
         }
 
+        System.out.println("test");
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        List<User> usersList = userMapper.selectList(queryWrapper);
+        if (usersList.size() > 0) {
+            User fistUser = usersList.get(0);
+            System.out.println(fistUser);
+        }
         queryWrapper.eq("username", username);
         List<User> users = userMapper.selectList(queryWrapper);
         if (!users.isEmpty()) {

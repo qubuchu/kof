@@ -38,7 +38,7 @@ public class AddServiceImpl implements AddService {
         Map<String, String> map = new HashMap<>();
 
         Date now = new Date();
-        Game game = new Game(null, player1, player2, role1, role2, now, now, winId);
+        Game game = new Game(null, player1, player2, role1, role2,  now, winId);
 
         gameMapper.insert(game);
         map.put("error_message", "success");

@@ -30,7 +30,7 @@ public class GetListServiceImpl implements GetListService{
         User user = getUser.getuser();
 
         QueryWrapper<Game> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc("play_begin_time");
+        queryWrapper.orderByDesc("play_time");
         queryWrapper.or(wrapper -> wrapper.eq("player1", user.getId()))
                 .or(wrapper -> wrapper.eq("player2", user.getId()));
 

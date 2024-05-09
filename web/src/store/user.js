@@ -5,6 +5,7 @@ export default {
         id: "",
         username: "",
         photo: "",
+        rating: "",
         token: "",
         is_login: false,
         pulling_info: true,// 是否从云端拉取信息
@@ -16,6 +17,7 @@ export default {
             state.id = user.id;
             state.username = user.username;
             state.photo = user.photo;
+            state.rating = user.rating;
             state.is_login = user.is_login;
         },
         updateToken(state, token) {

@@ -54,7 +54,7 @@ public class Gameback extends Thread{
             ratingB -= 10;
             ratingA += 10;
         }
-        Game game = new Game(null, playerA.getId(), playerB.getId(), 1, 1, now, now, winid);
+        Game game = new Game(null, playerA.getId(), playerB.getId(), 1, 1, now, winid);
 
         updateUserRating(playerA, ratingA);
         updateUserRating(playerB, ratingB);
